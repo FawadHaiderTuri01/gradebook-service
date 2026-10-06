@@ -5,6 +5,7 @@ import http.server
 import json
 import logging
 import sys
+from typing import Any
 
 from errors import ConflictError, NotFoundError, ValidationError
 from models import parse_assessment, parse_mark, parse_student
@@ -12,7 +13,7 @@ from models import parse_assessment, parse_mark, parse_student
 logger = logging.getLogger(__name__)
 
 DATA = "gradebook.json"
-STATE = {}
+STATE: dict[str, Any] = {}
 
 
 def load() -> None:
@@ -29,9 +30,9 @@ def save() -> None:
         json.dump(STATE, f)
 
 
-def pct(sid):
-    total = 0
-    got = 0
+def pct(sid: str) -> str:
+    total = 0.0
+    got = 0.0
     for m in STATE["marks"]:
         if m["student"] == sid:
             a = STATE["assessments"].get(m["assessment"])
@@ -181,14 +182,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
         except Exception as error:  # noqa: BLE001
             self._handle_error(error)
 
-def main(argv=sys.argv):
+def main(argv: list[str]) -> None:
     load()
     port = 8000
     if len(argv) > 1:
+        if not argv[1].isdigit() or not 1 <= int(argv[1]) <= 65535:
+            raise SystemExit("port must be a whole number from 1 to 65535")
         port = int(argv[1])
     logger.info("gradebook on %s", port)
     http.server.HTTPServer(("", port), Handler).serve_forever()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
