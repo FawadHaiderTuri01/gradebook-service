@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 
 from errors import ValidationError
@@ -48,16 +49,23 @@ class Mark:
             raise ValidationError("score must not be negative")
 
 def parse_number(value: object) -> float:
-    if isinstance(value, (int, float)):
-        return float(value)
+    if isinstance(value, bool):
+        raise ValidationError("invalid number")
 
-    if isinstance(value, str):
+    if isinstance(value, (int, float)):
+        number = float(value)
+    elif isinstance(value, str):
         try:
-            return float(value)
+            number = float(value)
         except ValueError:
             raise ValidationError("invalid number")
+    else:
+        raise ValidationError("invalid number")
 
-    raise ValidationError("invalid number")
+    if not math.isfinite(number):
+        raise ValidationError("invalid number")
+
+    return number
 
 
 def parse_text(value: object) -> str:

@@ -98,3 +98,88 @@ Found 10 errors.
 gradebook.py line 19 - load()
 gradebook.py line 28 - save()
 gradebook.py line 84 - do_POST()
+
+# Task 8 - Repeated Task 2 Tests
+
+## (a) GET /students/NOPE
+
+Command:
+curl.exe -i localhost:8000/students/NOPE
+
+Result:
+HTTP/1.0 404 Not Found
+{"error": "student not found"}
+
+The service now returns an appropriate 404 error for a student that does not exist.
+
+## (b) POST /students with body 5
+
+Command:
+curl.exe -i -X POST localhost:8000/students -H "Content-Type: application/json" -d "5"
+
+Result:
+HTTP/1.0 400 Bad Request
+{"error": "invalid student"}
+
+The service now rejects the invalid student payload with HTTP 400.
+
+## (c) Invalid mark score "abc"
+
+Student S1 and assessment A1 were created successfully.
+
+Command:
+curl.exe -i -X POST http://localhost:8000/marks -H "Content-Type: application/json" -d '{"student":"S1","assessment":"A1","score":"abc"}'
+
+Result:
+HTTP/1.0 400 Bad Request
+{"error": "invalid number"}
+
+The service now rejects the invalid score.
+
+Command:
+curl.exe -i http://localhost:8000/students/S1
+
+Result:
+HTTP/1.0 200 OK
+
+The student request completed successfully.
+
+## (d) Assessment total 0
+
+gradebook.json was deleted before restarting so the test started with a clean gradebook.
+
+An assessment with total 0 was rejected by validation.
+
+The service no longer accepts an assessment with a zero total.
+
+## (e) Mark for non-existing assessment
+
+gradebook.json was deleted before restarting.
+
+A mark for a non-existing assessment was rejected with an appropriate error instead of returning HTTP 200.
+
+## Final checks
+
+Command:
+python -m pytest
+
+Result:
+9 passed in 0.13s
+
+Command:
+mypy gradebook.py
+
+Result:
+Success: no issues found in 1 source file
+
+Command:
+mypy --strict errors.py models.py
+
+Result:
+Success: no issues found in 2 source files
+
+Command:
+ruff check .
+
+Result:
+All checks passed!
