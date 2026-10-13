@@ -3,7 +3,8 @@ import http.server
 import json
 import logging
 import sys
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from errors import ConflictError, NotFoundError, ValidationError
 from models import Mark, parse_assessment, parse_mark, parse_student
