@@ -1,14 +1,12 @@
-# gradebook.py -- the department gradebook service
-# started by someone who left. it works. don't touch it.
 import datetime
 import http.server
 import json
 import logging
 import sys
-from typing import Any
+from typing import Any, Callable
 
 from errors import ConflictError, NotFoundError, ValidationError
-from models import parse_assessment, parse_mark, parse_student
+from models import Mark, parse_assessment, parse_mark, parse_student
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +40,35 @@ def pct(sid: str) -> str:
     if total == 0:
         return "0"
     return str(round(got, 2))
+
+
+def now() -> str:
+    return str(datetime.datetime.now(datetime.timezone.utc))
+
+
+def add_mark(
+    state: dict[str, Any],
+    mark: Mark,
+    now: Callable[[], str],
+    save: Callable[[], None],
+) -> None:
+    """Check a mark against the gradebook, then record it and save."""
+    if mark.student not in state["students"]:
+        raise NotFoundError(f"no such student: {mark.student}")
+    assessment_row = state["assessments"].get(mark.assessment)
+    if assessment_row is None:
+        raise NotFoundError(f"no such assessment: {mark.assessment}")
+    if float(mark.score) > float(assessment_row["total"]):
+        raise ValidationError("score exceeds assessment total")
+    state["marks"].append(
+        {
+            "student": mark.student,
+            "assessment": mark.assessment,
+            "score": mark.score,
+            "at": now(),
+        }
+    )
+    save()
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
@@ -118,7 +145,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             STATE["students"][student.id] = {
                 "id": student.id,
                 "name": student.name,
-                "joined": str(datetime.datetime.now(datetime.timezone.utc)),
+                "joined": now(),
             }
 
             save()
@@ -142,29 +169,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         if self.path == "/marks":
             mark = parse_mark(d)
-
-            if mark.student not in STATE["students"]:
-                raise NotFoundError("student not found")
-
-            if mark.assessment not in STATE["assessments"]:
-                raise NotFoundError("assessment not found")
-
-            assessment = STATE["assessments"][mark.assessment]
-
-            if mark.score > float(assessment["total"]):
-                raise ValidationError("score exceeds total")
-
-            STATE["marks"].append(
-                {
-                    "student": mark.student,
-                    "assessment": mark.assessment,
-                    "score": mark.score,
-                    "at": str(datetime.datetime.now(datetime.timezone.utc)),
-                }
-            )
-
-            save()
-            return 201, {"ok": True}
+            add_mark(STATE, mark, now, save)
+            logger.info("recorded mark for %s score %s", mark.student, mark.score)
+            return 200, {"ok": True}
 
         raise NotFoundError("unknown endpoint")
 
