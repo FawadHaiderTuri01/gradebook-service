@@ -1,50 +1,23 @@
-import pytest
 import gradebook
 
 
-def test_student_without_marks_has_zero_percent(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Arrange
-    state = {
-        "students": {"S1": {"id": "S1", "name": "Ayesha"}},
-        "assessments": {"A1": {"id": "A1", "weight": 10.0, "total": 20.0}},
-        "marks": [],
-    }
-    monkeypatch.setattr(gradebook, "STATE", state)
-
-    # Act
+def test_student_with_no_marks_has_zero_percent(loaded):
     result = gradebook.pct("S1")
 
-    # Assert
     assert result == "0"
 
 
-def test_one_mark_counts_score_over_total_times_weight(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Arrange
-    state = {
-        "students": {"S1": {"id": "S1", "name": "Ayesha"}},
-        "assessments": {"A1": {"id": "A1", "weight": 10.0, "total": 20.0}},
-        "marks": [{"student": "S1", "assessment": "A1", "score": 15}],
-    }
-    monkeypatch.setattr(gradebook, "STATE", state)
+def test_mark_of_15_out_of_20_on_weight_10_gives_7_5(loaded):
+    loaded["marks"].append({"student": "S1", "assessment": "A1", "score": 15})
 
-    # Act
     result = gradebook.pct("S1")
 
-    # Assert
     assert result == "7.5"
 
 
-def test_mark_for_unknown_assessment_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Arrange
-    state = {
-        "students": {"S1": {"id": "S1", "name": "Ayesha"}},
-        "assessments": {"A1": {"id": "A1", "weight": 10.0, "total": 20.0}},
-        "marks": [{"student": "S1", "assessment": "GHOST", "score": 5}],
-    }
-    monkeypatch.setattr(gradebook, "STATE", state)
+def test_mark_for_unknown_assessment_is_ignored(loaded):
+    loaded["marks"].append({"student": "S1", "assessment": "GHOST", "score": 15})
 
-    # Act
     result = gradebook.pct("S1")
 
-    # Assert
     assert result == "0"
