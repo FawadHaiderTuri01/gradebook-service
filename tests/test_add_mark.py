@@ -44,3 +44,25 @@ def test_rejected_mark_changes_nothing(state, mark, error):
 
     assert state["marks"] == []
     save.assert_not_called()
+
+def test_add_mark_replaces_existing_mark(state) -> None:
+    save_mock = Mock()
+    now_fn = lambda: "2026-01-01"
+    mark1 = Mark(student="S1", assessment="A1", score=5.0)
+    mark2 = Mark(student="S1", assessment="A1", score=18.0)
+
+    add_mark(state, mark1, now=now_fn, save=save_mock)
+    add_mark(state, mark2, now=now_fn, save=save_mock)
+
+    s1_a1_marks = [
+        m for m in state["marks"]
+        if (m.student if hasattr(m, "student") else m["student"]) == "S1"
+        and (m.assessment if hasattr(m, "assessment") else m["assessment"]) == "A1"
+    ]
+    assert len(s1_a1_marks) == 1
+    actual_score = (
+        s1_a1_marks[0].score
+        if hasattr(s1_a1_marks[0], "score")
+        else s1_a1_marks[0]["score"]
+    )
+    assert actual_score == 18.0

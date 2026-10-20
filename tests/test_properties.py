@@ -1,10 +1,11 @@
 from unittest.mock import patch
-import pytest
-from hypothesis import given, strategies as st
+
+from hypothesis import given
+from hypothesis import strategies as st
+
 import gradebook
 
 
-@pytest.mark.xfail(strict=True, reason="duplicate marks are all counted")
 @given(
     scores=st.lists(
         st.integers(min_value=0, max_value=20),
@@ -26,7 +27,7 @@ def test_pct_does_not_exceed_weight(scores: list[int]) -> None:
             state,
             gradebook.Mark(student="S1", assessment="A1", score=float(score)),
             now=lambda: "2026-01-01",
-            save=lambda s: None,
+            save=lambda: None,
         )
 
     with patch.object(gradebook, "STATE", state):

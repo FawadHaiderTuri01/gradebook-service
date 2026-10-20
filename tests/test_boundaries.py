@@ -1,9 +1,11 @@
 from unittest.mock import Mock
+
 import pytest
+
 from errors import ValidationError
+from gradebook import add_mark
 from models import Mark
 from rules import ensure_weight_fits
-from gradebook import add_mark
 
 
 # 1. Assessment weight boundaries for ensure_weight_fits

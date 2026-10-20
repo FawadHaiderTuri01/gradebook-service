@@ -10,32 +10,84 @@ from errors import ConflictError, NotFoundError, ValidationError
 from models import Assessment, Mark, parse_assessment, parse_mark, parse_student
 from rules import ensure_weight_fits
 
+STATE: dict[str, Any] = {
+    "students": {},
+    "assessments": {},
+    "marks": [],
+}
 
-def add_assessment(state: dict, assessment: Assessment, save) -> None:
-    a_id = assessment.id if hasattr(assessment, "id") else assessment["id"]
-    a_weight = (
-        assessment.weight
-        if hasattr(assessment, "weight")
-        else assessment["weight"]
-    )
 
+def add_assessment(
+    state: dict[str, Any],
+    assessment: Assessment,
+    save: Callable[[], None],
+) -> None:
+    """Validate duplicate ID and weight fit, then add assessment to state."""
+    a_id = assessment.id
     if a_id in state["assessments"]:
-        raise ConflictError(f"Assessment '{a_id}' already exists")
+        raise ConflictError(f"assessment already exists: {a_id}")
 
-    existing_weights = [
-        item.weight if hasattr(item, "weight") else item["weight"]
-        for item in state["assessments"].values()
+    existing_weights: list[float] = []
+    for a in state["assessments"].values():
+        if isinstance(a, dict):
+            existing_weights.append(float(a["weight"]))
+        else:
+            existing_weights.append(float(a.weight))
+
+    ensure_weight_fits(existing_weights, float(assessment.weight))
+    state["assessments"][a_id] = assessment
+    save()
+
+
+def add_mark(
+    state: dict[str, Any],
+    mark: Mark,
+    now: Callable[[], str],
+    save: Callable[[], None],
+) -> None:
+    """Check a mark against the gradebook, then record it and save."""
+    s_id = mark.student
+    a_id = mark.assessment
+    score_val = float(mark.score)
+
+    if s_id not in state["students"]:
+        raise NotFoundError(f"no such student: {s_id}")
+
+    assessment_row = state["assessments"].get(a_id)
+    if assessment_row is None:
+        raise NotFoundError(f"no such assessment: {a_id}")
+
+    total_val = float(
+        assessment_row.total
+        if hasattr(assessment_row, "total")
+        else assessment_row["total"]
+    )
+    if score_val > total_val:
+        raise ValidationError("score exceeds assessment total")
+
+    # Filter out existing mark for same student and assessment
+    state["marks"] = [
+        m
+        for m in state["marks"]
+        if not (
+            (m["student"] if isinstance(m, dict) else getattr(m, "student", None)) == s_id
+            and (m["assessment"] if isinstance(m, dict) else getattr(m, "assessment", None)) == a_id
+        )
     ]
 
-    ensure_weight_fits(existing_weights, a_weight)
-
-    state["assessments"][a_id] = assessment
-    save(state)
+    record = {
+        "student": s_id,
+        "assessment": a_id,
+        "score": score_val,
+        "at": now(),
+    }
+    state["marks"].append(record)
+    save()
 
 logger = logging.getLogger(__name__)
 
 DATA = "gradebook.json"
-STATE: dict[str, Any] = {}
+
 
 
 def load() -> None:
@@ -69,30 +121,6 @@ def pct(sid: str) -> str:
 def now() -> str:
     return str(datetime.datetime.now(datetime.timezone.utc))
 
-
-def add_mark(
-    state: dict[str, Any],
-    mark: Mark,
-    now: Callable[[], str],
-    save: Callable[[], None],
-) -> None:
-    """Check a mark against the gradebook, then record it and save."""
-    if mark.student not in state["students"]:
-        raise NotFoundError(f"no such student: {mark.student}")
-    assessment_row = state["assessments"].get(mark.assessment)
-    if assessment_row is None:
-        raise NotFoundError(f"no such assessment: {mark.assessment}")
-    if float(mark.score) > float(assessment_row["total"]):
-        raise ValidationError("score exceeds assessment total")
-    state["marks"].append(
-        {
-            "student": mark.student,
-            "assessment": mark.assessment,
-            "score": mark.score,
-            "at": now(),
-        }
-    )
-    save()
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
