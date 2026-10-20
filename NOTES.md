@@ -214,3 +214,10 @@ After undoing the change:
 ## Task 1: Baseline Coverage
 - Total Coverage: 44%
 - File with Lowest Coverage: gradebook.py (38%)
+
+## Task 2: TDD Cycles
+
+### Cycle 1
+- **Failure Message:** `ModuleNotFoundError: No module named 'rules'`
+### Cycle 2
+- **Failure Message:** `Failed: DID NOT RAISE <class 'errors.ValidationError'>`
