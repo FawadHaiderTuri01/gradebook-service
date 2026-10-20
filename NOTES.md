@@ -206,12 +206,11 @@ After undoing the change:
 - pct() is plain logic inside my own program. I can call it directly, and mocking it would hide the very calculation under test.
 - tmp_path gives a real, empty file for each test. Testing load() and save() against it checks what really happens (JSON written and read back, a missing file, a corrupt file). A mock would only check that I called open.
 
-## Lab 05 — Task 1
 
 ## Lab 05 — Task 1
 
-- Total coverage: 44%
-- File with the lowest coverage: gradebook.py (38%)
-- Installed hypothesis and coverage.
-- Created the .coveragerc configuration file.
-- Updated .gitignore to exclude generated coverage files and Hypothesis data.
+# Lab 05 Notes
+
+## Task 1: Baseline Coverage
+- Total Coverage: 44%
+- File with Lowest Coverage: gradebook.py (38%)
