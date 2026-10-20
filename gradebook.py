@@ -7,7 +7,30 @@ from collections.abc import Callable
 from typing import Any
 
 from errors import ConflictError, NotFoundError, ValidationError
-from models import Mark, parse_assessment, parse_mark, parse_student
+from models import Assessment, Mark, parse_assessment, parse_mark, parse_student
+from rules import ensure_weight_fits
+
+
+def add_assessment(state: dict, assessment: Assessment, save) -> None:
+    a_id = assessment.id if hasattr(assessment, "id") else assessment["id"]
+    a_weight = (
+        assessment.weight
+        if hasattr(assessment, "weight")
+        else assessment["weight"]
+    )
+
+    if a_id in state["assessments"]:
+        raise ConflictError(f"Assessment '{a_id}' already exists")
+
+    existing_weights = [
+        item.weight if hasattr(item, "weight") else item["weight"]
+        for item in state["assessments"].values()
+    ]
+
+    ensure_weight_fits(existing_weights, a_weight)
+
+    state["assessments"][a_id] = assessment
+    save(state)
 
 logger = logging.getLogger(__name__)
 
