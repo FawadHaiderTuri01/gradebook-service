@@ -14,7 +14,6 @@ def state():
         "marks": [],
     }
 
-
 @pytest.fixture
 def loaded(state, monkeypatch):
     monkeypatch.setattr(gradebook, "STATE", state)

@@ -20,7 +20,6 @@ def test_valid_mark_is_stored_with_the_time(state):
         {"student": "S1", "assessment": "A1", "score": 15.0, "at": "2026-10-12 09:00:00"}
     ]
 
-
 def test_valid_mark_calls_save_once(state):
     save = Mock()
 
