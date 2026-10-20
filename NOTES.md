@@ -208,7 +208,10 @@ After undoing the change:
 
 ## Lab 05 — Task 1
 
-- Total coverage: XX%
-- File with the lowest coverage: filename.py
+## Lab 05 — Task 1
+
+- Total coverage: 44%
+- File with the lowest coverage: gradebook.py (38%)
 - Installed hypothesis and coverage.
-- Created .coveragerc and updated .gitignore.
+- Created the .coveragerc configuration file.
+- Updated .gitignore to exclude generated coverage files and Hypothesis data.
