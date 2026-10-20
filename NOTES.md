@@ -237,3 +237,10 @@ After undoing the change:
 Coverage told me which lines and branches of code ran while tests were executing. It could not tell me whether the tests actually asserted and verified the correctness of the code.
 
 - **Untested Function in `gradebook.py`:** parse_assessment
+
+## Task 6: Boundary Testing
+- **Failing Boundary Test Name:** test_add_mark_score_accepted[20.0]
+
+## Task 7: Hypothesis Property Test
+- **Counterexample Found:** `scores=[0, 0]` (or any list with multiple scores)
+- **Defect Explanation:** `add_mark` appends every new mark for a student to `state["marks"]` without replacing old marks for the same assessment. Consequently, `pct()` sums up duplicate marks, causing the total student percentage to exceed the assessment weight.
