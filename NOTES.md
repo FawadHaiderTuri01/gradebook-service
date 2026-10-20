@@ -221,3 +221,19 @@ After undoing the change:
 - **Failure Message:** `ModuleNotFoundError: No module named 'rules'`
 ### Cycle 2
 - **Failure Message:** `Failed: DID NOT RAISE <class 'errors.ValidationError'>`
+### Cycle 3
+- **Failure Message:** Did not fail first (passed immediately because `100 > 100` is `False`).
+### Cycle 4
+- **Failure Message:** `errors.ValidationError: Total weight exceeds 100` (due to floating point precision yielding 100.00000000000001)
+
+
+## Task 5: Coverage Reflection
+- **New Total Coverage:** 50%
+
+## Task 5: Coverage Reflection
+- **New Total Coverage:** 50%
+
+### Reflection
+Coverage told me which lines and branches of code ran while tests were executing. It could not tell me whether the tests actually asserted and verified the correctness of the code.
+
+- **Untested Function in `gradebook.py`:** parse_assessment
