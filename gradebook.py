@@ -46,6 +46,7 @@ def add_mark(
     save: Callable[[], None],
 ) -> None:
     """Check a mark against the gradebook, then record it and save."""
+    # All checks come first, so a rejected mark leaves no trace.
     s_id = mark.student
     a_id = mark.assessment
     score_val = float(mark.score)
