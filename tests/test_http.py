@@ -31,3 +31,18 @@ def http_server(loaded):
 def test_get_student_urls_return_200(http_server, path):
     with urlopen(f"{http_server}{path}") as response:
         assert response.status == 200
+
+def test_body_that_is_not_utf8_is_a_bad_request(http_server):
+    import urllib.error
+    from urllib.request import Request, urlopen
+
+    request = Request(
+        f"{http_server}/students",
+        data=b"\x80\x81\x82",
+        method="POST",
+    )
+
+    with pytest.raises(urllib.error.HTTPError) as error:
+        urlopen(request)
+
+    assert error.value.code == 400

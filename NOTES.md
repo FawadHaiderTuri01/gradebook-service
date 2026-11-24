@@ -267,3 +267,17 @@ Coverage told me which lines and branches of code ran while tests were executing
 | A | To be investigated | To be completed | To be completed |
 | B | To be investigated | To be completed | To be completed |
 | C | To be investigated | To be completed | To be completed |
+
+### Task 3 – Bug A: Trailing Slash
+
+- Bug: GET /students/S1/ returned 404 instead of 200.
+- First bad commit: 1566e610
+- Commit message: Task 2.3: Update student ID extraction
+- Cause: The change to student ID extraction did not handle trailing slashes.
+- Detection: Git Bisect identified the first bad commit.
+
+### Task 5 – Bug C: Invalid UTF-8 Request
+
+- Bug: Invalid UTF-8 request body returned 500 Internal Server Error.
+- Cause: UnicodeDecodeError was not caught in the JSON parsing code.
+- Reproduction: POST request with invalid UTF-8 bytes returned 500.
