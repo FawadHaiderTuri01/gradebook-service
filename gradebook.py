@@ -152,7 +152,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return 200, list(STATE["students"].values())
 
         if self.path.startswith("/students/"):
-            sid = self.path.split("/")[2]
+            sid = self.path.removeprefix("/students/")
 
             if sid not in STATE["students"]:
                 raise NotFoundError("student not found")
@@ -181,8 +181,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         raise NotFoundError("unknown endpoint")
 
     def _post(self) -> tuple[int, object]:
-        lenght = int(self.headers.get("Content-Length", 0))
-        raw = self.rfile.read(lenght)
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length)
 
         try:
             d = json.loads(raw)
