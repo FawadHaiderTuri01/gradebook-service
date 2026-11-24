@@ -153,7 +153,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return 200, list(STATE["students"].values())
 
         if self.path.startswith("/students/"):
-            sid = self.path.removeprefix("/students/")
+            sid = self.path.removeprefix("/students/").split("?")[0].rstrip("/")
 
             if sid not in STATE["students"]:
                 raise NotFoundError("student not found")
