@@ -29,3 +29,19 @@ def test_add_assessment_rejects_duplicate_id(state) -> None:
     with pytest.raises(ConflictError):
         add_assessment(state, dup_assessment, save_mock)
     save_mock.assert_not_called()
+
+def test_failed_save_leaves_no_trace(state) -> None:
+    def failed_save():
+        raise OSError("disk full")
+
+    assessment = Assessment(
+        id="A3",
+        title="Final Exam",
+        weight=10.0,
+        total=50.0,
+    )
+
+    with pytest.raises(OSError, match="disk full"):
+        add_assessment(state, assessment, failed_save)
+
+    assert assessment.id not in state["assessments"]

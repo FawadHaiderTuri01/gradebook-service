@@ -36,7 +36,18 @@ def add_assessment(
 
     ensure_weight_fits(existing_weights, float(assessment.weight))
     state["assessments"][a_id] = assessment
-    save()
+
+    try:
+        save()
+    except OSError:
+        del state["assessments"][a_id]
+        logger.warning(
+            "could not save assessment %s; change rolled back",
+            assessment.id,
+        )
+        raise
+
+    
 
 
 def add_mark(
