@@ -248,3 +248,22 @@ Coverage told me which lines and branches of code ran while tests were executing
 ## Task 8: Final Coverage
 - **Final Total Coverage:** 52%
 
+
+# Lab 06 - Debugging and Regression Tests
+
+## Task 1: Initial Setup
+
+- Project: gradebook-service
+- Branch: bug-hunt
+- Initial branch: main
+- Initial working tree: clean
+- Initial pytest result: 40 passed
+- No existing changes were lost.
+
+## Bug Investigation
+
+| Bug | Cause | Fix | Test |
+|---|---|---|---|
+| A | To be investigated | To be completed | To be completed |
+| B | To be investigated | To be completed | To be completed |
+| C | To be investigated | To be completed | To be completed |
