@@ -105,6 +105,7 @@ def save() -> None:
 
 
 def pct(sid: str) -> str:
+    """Calculate the student's percentage."""
     total = 0.0
     got = 0.0
     for m in STATE["marks"]:
