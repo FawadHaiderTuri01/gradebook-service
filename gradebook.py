@@ -87,7 +87,7 @@ def add_mark(
 logger = logging.getLogger(__name__)
 
 DATA = "gradebook.json"
-
+DEFAULT_PORT = 8000
 
 
 def load() -> None:
@@ -244,7 +244,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 def main(argv: list[str]) -> None:
     load()
-    port = 8000
+    port = DEFAULT_PORT
     if len(argv) > 1:
         if not argv[1].isdigit() or not 1 <= int(argv[1]) <= 65535:
             raise SystemExit("port must be a whole number from 1 to 65535")
